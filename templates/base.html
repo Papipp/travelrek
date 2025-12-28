@@ -46,9 +46,6 @@
               <a class="nav-link" href="/admin">Dashboard</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="/admin/tambah">Tambah Paket</a>
-            </li>
-            <li class="nav-item">
               <a class="nav-link" href="/admin/laporan">Laporan Pesanan</a>
             </li>
             {% else %}
@@ -91,21 +88,23 @@
       </div>
     </nav>
 
-    <div class="container mt-3">
+    <div
+      id="flash-container"
+      class="position-fixed bottom-0 end-0 p-3"
+      style="z-index: 9999; margin-top: 60px"
+    >
       {% with messages = get_flashed_messages(with_categories=true) %} {% if
       messages %} {% for category, message in messages %}
       <div
-        class="alert alert-{{ category }} alert-dismissible fade show shadow-sm"
+        class="alert alert-{{ category }} alert-dismissible fade show shadow-lg animate__animated animate__fadeInRight mb-2"
         role="alert"
-        style="border-radius: 10px"
+        style="min-width: 300px; border-radius: 10px"
       >
         <div class="d-flex align-items-center">
           {% if category == 'success' %}
           <i class="bi bi-check-circle-fill me-2"></i>
           {% elif category == 'danger' %}
           <i class="bi bi-exclamation-triangle-fill me-2"></i>
-          {% else %}
-          <i class="bi bi-info-circle-fill me-2"></i>
           {% endif %}
           <div>{{ message }}</div>
         </div>
@@ -118,24 +117,30 @@
       </div>
       {% endfor %} {% endif %} {% endwith %}
     </div>
-
     <main>{% block content %}{% endblock %}</main>
 
     <footer class="bg-white border-top py-4 mt-5">
       <div class="container text-center">
-        <p class="text-muted mb-0">Apip Akmalul Iman | &copy; 2025 SITravel.</p>
+        <p class="text-muted mb-0">
+          Copyright &copy; 2025 TravelRek. All rights reserved
+        </p>
       </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      window.addEventListener("scroll", function () {
-        let nav = document.querySelector(".navbar");
-        if (window.pageYOffset > 50) {
-          nav.classList.add("scrolled");
-        } else {
-          nav.classList.remove("scrolled");
-        }
+      // Fungsi untuk menghapus alert otomatis
+      document.addEventListener("DOMContentLoaded", function () {
+        const alerts = document.querySelectorAll(".alert");
+        alerts.forEach(function (alert) {
+          setTimeout(function () {
+            // Gunakan Bootstrap class untuk fade out
+            alert.classList.remove("show");
+            alert.classList.add("fade");
+            // Hapus elemen dari DOM setelah animasi selesai
+            setTimeout(() => alert.remove(), 500);
+          }, 4000); // 4000ms = 4 detik
+        });
       });
     </script>
   </body>
