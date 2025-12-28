@@ -5,19 +5,14 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 def get_db():
     DATABASE_URL = os.getenv("DB_URL")
-    try:
-        conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
-        conn.autocommit = True 
-        return conn
-    except Exception as e:
-        print(f"Koneksi Supabase Gagal: {e}")
-        return None
+    conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+    conn.autocommit = True 
+    return conn
 
 class TravelModel:
     @staticmethod
     def get_all_packages():
         db = get_db()
-        if not db: return []
         with db.cursor() as cursor:
             cursor.execute("SELECT * FROM paket_travel ORDER BY id DESC")
             result = cursor.fetchall()
@@ -27,7 +22,6 @@ class TravelModel:
     @staticmethod
     def add_package(nama, tujuan, harga):
         db = get_db()
-        if not db: return
         with db.cursor() as cursor:
             cursor.execute("INSERT INTO paket_travel (nama_paket, tujuan, harga) VALUES (%s, %s, %s)", 
                            (nama, tujuan, harga))
@@ -36,7 +30,6 @@ class TravelModel:
     @staticmethod
     def delete_package(id):
         db = get_db()
-        if not db: return
         with db.cursor() as cursor:
             cursor.execute("DELETE FROM paket_travel WHERE id=%s", (id,))
         db.close()
@@ -44,7 +37,6 @@ class TravelModel:
     @staticmethod
     def get_package_by_id(id):
         db = get_db()
-        if not db: return None
         with db.cursor() as cursor:
             cursor.execute("SELECT * FROM paket_travel WHERE id=%s", (id,))
             result = cursor.fetchone()
@@ -54,7 +46,6 @@ class TravelModel:
     @staticmethod
     def update_package(id, nama, tujuan, harga):
         db = get_db()
-        if not db: return
         with db.cursor() as cursor:
             cursor.execute("""
                 UPDATE paket_travel 
@@ -66,24 +57,24 @@ class TravelModel:
     @staticmethod
     def pesan_paket(username, id_paket, tgl_wisata, jumlah, catatan):
         db = get_db()
-        if not db: return False
         cursor = db.cursor()
         cursor.execute('SELECT id_user FROM "user" WHERE username=%s', (username,))
         user = cursor.fetchone()
+        
+        status_berhasil = False
         if user:
             cursor.execute("""
                 INSERT INTO pesanan (id_user, id_paket, tgl_wisata, jumlah_orang, catatan, status) 
                 VALUES (%s, %s, %s, %s, %s, 'Pending')
             """, (user['id_user'], id_paket, tgl_wisata, jumlah, catatan))
-            db.close()
-            return True
+            status_berhasil = True
+            
         db.close()
-        return False
+        return status_berhasil
 
     @staticmethod
     def get_pesanan_user(username):
         db = get_db()
-        if not db: return []
         with db.cursor() as cursor:
             cursor.execute("""
                 SELECT pesanan.*, paket_travel.nama_paket, paket_travel.tujuan, paket_travel.harga 
@@ -100,7 +91,6 @@ class TravelModel:
     @staticmethod
     def get_semua_pesanan_admin():
         db = get_db()
-        if not db: return []
         with db.cursor() as cursor:
             cursor.execute("""
                 SELECT pesanan.*, paket_travel.nama_paket, "user".username 
@@ -116,27 +106,25 @@ class TravelModel:
     @staticmethod
     def update_status_admin(pesanan_id, status_baru):
         db = get_db()
-        if not db: return False, "Koneksi gagal"
         cursor = db.cursor()
         cursor.execute("SELECT status FROM pesanan WHERE id=%s", (pesanan_id,))
         pesanan = cursor.fetchone()
         
-        if pesanan:
-            if pesanan['status'] == 'Dibatalkan':
-                db.close()
-                return False, "Gagal! Pesanan sudah dibatalkan oleh user."
-            
-            cursor.execute("UPDATE pesanan SET status=%s WHERE id=%s", (status_baru, pesanan_id))
+        if not pesanan:
             db.close()
-            return True, f"Status pesanan berhasil diubah menjadi {status_baru}."
+            return False, "Data pesanan tidak ditemukan."
+
+        if pesanan['status'] == 'Dibatalkan':
+            db.close()
+            return False, "Gagal! Pesanan sudah dibatalkan oleh user."
         
+        cursor.execute("UPDATE pesanan SET status=%s WHERE id=%s", (status_baru, pesanan_id))
         db.close()
-        return False, "Data pesanan tidak ditemukan."
+        return True, f"Status pesanan berhasil diubah menjadi {status_baru}."
         
     @staticmethod
     def update_status_pesanan(id, status):
         db = get_db()
-        if not db: return
         with db.cursor() as cursor:
             cursor.execute("UPDATE pesanan SET status=%s WHERE id=%s", (status, id))
         db.close()
@@ -144,7 +132,6 @@ class TravelModel:
     @staticmethod
     def batal_pesanan_user(pesanan_id, username):
         db = get_db()
-        if not db: return False, "Koneksi gagal"
         cursor = db.cursor()
         sql_check = """
             SELECT pesanan.id FROM pesanan 
@@ -181,7 +168,6 @@ class UserModel:
     @staticmethod
     def authenticate(username, password):
         db = get_db()
-        if not db: return None
         with db.cursor() as cursor:
             cursor.execute('SELECT * FROM "user" WHERE username=%s', (username,))
             user = cursor.fetchone()
@@ -195,7 +181,6 @@ class UserModel:
     @staticmethod
     def get_user_profile(username):
         db = get_db()
-        if not db: return None
         cursor = db.cursor()
         cursor.execute('SELECT id_user, username, role FROM "user" WHERE username=%s', (username,))
         user = cursor.fetchone()
@@ -205,7 +190,6 @@ class UserModel:
     @staticmethod
     def update_password(username, new_password):
         db = get_db()
-        if not db: return False
         cursor = db.cursor()
         hashed_pw = generate_password_hash(new_password)
         cursor.execute('UPDATE "user" SET password=%s WHERE username=%s', (hashed_pw, username))
