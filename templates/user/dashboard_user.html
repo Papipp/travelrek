@@ -1,0 +1,43 @@
+{% extends 'base.html' %} {%block title %} Dashboard User {% endblock %} {%
+block content%}
+
+<header class="hero-section text-center">
+  <div class="container">
+    <h1 class="display-4 fw-bold">Eksplorasi Destinasi Impianmu</h1>
+    <p class="lead">Pilih paket travel terbaik dengan harga terjangkau</p>
+  </div>
+</header>
+
+<div class="container mb-5">
+  <h3 class="mb-4">Daftar Paket Tersedia</h3>
+  <div class="row">
+    {% if paket %} {% for p in paket %}
+    <div class="col-md-4 mb-4">
+      <div class="card h-100 shadow-sm border-0">
+        <div class="card-body">
+          <h5 class="card-title fw-bold text-primary">{{ p.nama_paket }}</h5>
+          <h6 class="card-subtitle mb-2 text-muted">
+            <i class="bi bi-geo-alt"></i> Tujuan: {{ p.tujuan }}
+          </h6>
+          <p class="card-text text-secondary">
+            Nikmati perjalanan tak terlupakan ke {{ p.tujuan }} dengan fasilitas
+            lengkap.
+          </p>
+          <hr />
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <span class="price-tag">Rp {{ "{:,.0f}".format(p.harga) }}</span>
+            <a href="{{ url_for('form_pesan', id=p.id) }}" class="btn btn-primary btn-sm w-50">Pesan Sekarang</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %} {% else %}
+    <div class="col-12">
+      <div class="alert alert-info text-center">
+        Maaf, saat ini belum ada paket travel yang tersedia.
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

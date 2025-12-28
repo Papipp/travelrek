@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-4 text-center">
+                    <div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                        {{ user.username[0] | upper }}
+                    </div>
+                    <h4 class="fw-bold">{{ user.username }}</h4>
+                    <span class="badge bg-secondary px-3 py-2 text-capitalize">{{ user.role }}</span>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">Keamanan & Password</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Password Baru</label>
+                            <input type="password" name="new_password" class="form-control" placeholder="Masukkan password baru" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label small fw-bold">Konfirmasi Password Baru</label>
+                            <input type="password" name="confirm_password" class="form-control" placeholder="Ulangi password baru" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Simpan Perubahan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
